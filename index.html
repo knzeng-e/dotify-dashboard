@@ -1,654 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Dotify — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#06152d;
-  --navy2:#0a1f45;
-  --cyan:#2bb3ff;
-  --cyan2:rgba(43,179,255,.15);
-  --cyan3:rgba(43,179,255,.06);
-  --pink:#e6007a;
-  --pink2:rgba(230,0,122,.12);
-  --green:#c8ff4d;
-  --white:#ffffff;
-  --off:#f0f6ff;
-  --muted:rgba(255,255,255,.6);
-  --border:rgba(43,179,255,.18);
-  --r:10px;
-}
-html{scroll-behavior:smooth}
-body{
-  font-family:'DM Sans',sans-serif;
-  background:var(--navy);
-  color:var(--white);
-  min-height:100vh;
-  overflow-x:hidden;
-}
-.bg-mesh{
-  position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 60% 50% at 15% 10%,rgba(43,179,255,.18),transparent),
-    radial-gradient(ellipse 50% 60% at 90% 80%,rgba(230,0,122,.12),transparent),
-    radial-gradient(ellipse 40% 40% at 80% 15%,rgba(200,255,77,.06),transparent),
-    var(--navy);
-}
-.grain{
-  position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.03;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:200px;
-}
-
-/* LANG SPLASH */
-#lang-splash{
-  position:fixed;inset:0;z-index:9999;
-  background:var(--navy);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;
-  transition:opacity .5s ease, visibility .5s ease;
-}
-#lang-splash.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.splash-brand{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.splash-dot{
-  width:44px;height:44px;border-radius:50%;
-  background:var(--cyan);display:flex;align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--navy);
-  box-shadow:0 0 32px rgba(43,179,255,.6);
-  animation:pulse-dot 3s ease-in-out infinite;
-}
-@keyframes pulse-dot{0%,100%{box-shadow:0 0 24px rgba(43,179,255,.5)}50%{box-shadow:0 0 48px rgba(43,179,255,.9),0 0 80px rgba(43,179,255,.3)}}
-.splash-name{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:var(--white);letter-spacing:-.02em}
-.splash-tagline{font-size:1rem;color:var(--muted);text-align:center;max-width:400px;line-height:1.6}
-.splash-choices{display:flex;gap:16px}
-.splash-btn{
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  background:rgba(10,31,69,.7);border:1px solid var(--border);
-  border-radius:12px;padding:22px 36px;cursor:pointer;
-  transition:all .2s;text-decoration:none;
-  min-width:160px;
-}
-.splash-btn:hover{border-color:var(--cyan);background:var(--cyan2);transform:translateY(-2px)}
-.splash-btn .flag{font-size:28px}
-.splash-btn .lbl{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--white)}
-.splash-btn .sub{font-size:.78rem;color:var(--muted)}
-
-/* MAIN CONTENT */
-#app{opacity:0;transition:opacity .5s ease}
-#app.visible{opacity:1}
-
-.wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 24px 80px}
-
-nav{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:20px 0;gap:16px;
-  border-bottom:1px solid var(--border);
-}
-.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-.brand-dot{
-  width:32px;height:32px;border-radius:50%;
-  background:var(--cyan);display:flex;align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:var(--navy);
-  box-shadow:0 0 20px rgba(43,179,255,.4);
-  animation:pulse-dot 3s ease-in-out infinite;
-}
-.brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--white);letter-spacing:-.02em}
-.nav-right{display:flex;align-items:center;gap:12px}
-.nav-tag{
-  background:var(--pink2);border:1px solid rgba(230,0,122,.3);
-  border-radius:6px;color:var(--pink);font-size:12px;font-weight:600;
-  padding:4px 10px;letter-spacing:.06em;text-transform:uppercase;
-}
-.lang-switch{
-  display:flex;align-items:center;gap:6px;
-  background:rgba(10,31,69,.7);border:1px solid var(--border);
-  border-radius:8px;padding:4px;
-}
-.lang-switch button{
-  background:none;border:none;border-radius:6px;
-  color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
-  padding:4px 10px;cursor:pointer;transition:all .2s;letter-spacing:.04em;
-}
-.lang-switch button.active{background:var(--cyan);color:var(--navy)}
-
-/* HERO */
-.hero{
-  display:grid;grid-template-columns:1fr 340px;gap:48px;
-  align-items:center;padding:72px 0 64px;
-  border-bottom:1px solid var(--border);
-}
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  background:var(--cyan2);border:1px solid var(--border);
-  border-radius:100px;padding:6px 14px;
-  font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);
-  margin-bottom:24px;
-}
-.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:blink 2s ease-in-out infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-h1{
-  font-family:'Syne',sans-serif;font-weight:800;
-  font-size:clamp(2.8rem,5vw,4.6rem);line-height:.96;
-  letter-spacing:-.04em;margin-bottom:20px;color:var(--white);
-}
-h1 .accent{color:var(--cyan)}
-h1 .accent-pink{color:var(--pink)}
-.hero-desc{font-size:1.05rem;line-height:1.72;color:var(--muted);max-width:560px;margin-bottom:36px}
-.hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
-.btn-primary{
-  display:inline-flex;align-items:center;gap:8px;
-  background:var(--cyan);color:var(--navy);
-  font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
-  padding:12px 24px;border-radius:8px;border:none;cursor:pointer;
-  text-decoration:none;transition:all .2s;
-  box-shadow:0 4px 24px rgba(43,179,255,.35);
-}
-.btn-primary:hover{background:#4dc8ff;transform:translateY(-1px);box-shadow:0 8px 32px rgba(43,179,255,.5)}
-.btn-secondary{
-  display:inline-flex;align-items:center;gap:8px;
-  background:transparent;color:var(--white);
-  font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;
-  padding:12px 24px;border-radius:8px;border:1px solid var(--border);cursor:pointer;
-  text-decoration:none;transition:all .2s;
-}
-.btn-secondary:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan2)}
-
-/* HERO VISUAL */
-.rooms-card{
-  background:rgba(10,31,69,.85);border:1px solid var(--border);
-  border-radius:14px;padding:20px;
-  backdrop-filter:blur(20px);
-}
-.rooms-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.rooms-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.live-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--green);letter-spacing:.06em}
-.live-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.4s ease-in-out infinite}
-.room-item{
-  display:flex;align-items:center;gap:12px;
-  padding:12px;border-radius:8px;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
-  margin-bottom:8px;cursor:pointer;transition:all .2s;
-}
-.room-item:hover{background:rgba(43,179,255,.1);border-color:rgba(43,179,255,.25)}
-.room-item:last-child{margin-bottom:0}
-.room-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
-.room-name{font-weight:500;font-size:14px;color:var(--white)}
-.room-meta{font-size:12px;color:var(--muted);margin-top:2px}
-.room-listeners{font-size:12px;font-weight:700;color:var(--cyan);white-space:nowrap}
-.hero-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.mini-stat{text-align:center;padding:10px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px}
-.mini-stat strong{display:block;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--cyan)}
-.mini-stat span{font-size:11px;color:var(--muted)}
-
-/* SECTION LABEL */
-.section-label{display:flex;align-items:center;gap:12px;padding:56px 0 32px}
-.section-label h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
-.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
-
-/* PILLARS */
-.pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.pillar{
-  border:1px solid var(--border);border-radius:var(--r);
-  padding:28px 24px;position:relative;overflow:hidden;
-  background:rgba(10,31,69,.5);
-  transition:border-color .3s,transform .25s;
-}
-.pillar:hover{border-color:var(--cyan);transform:translateY(-3px)}
-.pillar::before{
-  content:'';position:absolute;inset:0;opacity:0;
-  background:radial-gradient(ellipse 60% 60% at 50% 0%,rgba(43,179,255,.08),transparent);
-  transition:opacity .3s;
-}
-.pillar:hover::before{opacity:1}
-.pillar-icon{font-size:28px;margin-bottom:16px;display:block}
-.pillar h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:10px;color:var(--white)}
-.pillar p{font-size:.9rem;line-height:1.65;color:var(--muted)}
-.pillar-pink{border-color:rgba(230,0,122,.2)}
-.pillar-pink:hover{border-color:var(--pink)}
-.pillar-pink::before{background:radial-gradient(ellipse 60% 60% at 50% 0%,rgba(230,0,122,.07),transparent)}
-.pillar-green{border-color:rgba(200,255,77,.15)}
-.pillar-green:hover{border-color:var(--green)}
-.pillar-green::before{background:radial-gradient(ellipse 60% 60% at 50% 0%,rgba(200,255,77,.05),transparent)}
-
-/* HOW */
-.how-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
-.steps{display:flex;flex-direction:column}
-.step{display:flex;gap:20px;padding:22px 0;border-bottom:1px solid var(--border)}
-.step:last-child{border-bottom:none}
-.step-num{
-  width:36px;height:36px;border-radius:50%;flex-shrink:0;
-  background:rgba(43,179,255,.1);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:var(--cyan);
-}
-.step-body h4{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:6px;color:var(--white)}
-.step-body p{font-size:.88rem;line-height:1.6;color:var(--muted)}
-
-/* FLOW */
-.flow-visual{background:rgba(10,31,69,.6);border:1px solid var(--border);border-radius:14px;padding:28px}
-.flow-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
-.flow-chain{display:flex;flex-direction:column;gap:0}
-.flow-node{display:flex;align-items:center;gap:14px;padding:10px;border-radius:8px;position:relative}
-.flow-node+.flow-node::before{content:'';display:block;width:1px;height:14px;background:var(--border);position:absolute;left:21px;top:-14px}
-.flow-node-dot{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px}
-.dot-cyan{background:rgba(43,179,255,.15);border:1px solid var(--cyan);color:var(--cyan)}
-.dot-pink{background:rgba(230,0,122,.12);border:1px solid var(--pink);color:var(--pink)}
-.dot-green{background:rgba(200,255,77,.1);border:1px solid var(--green);color:var(--green)}
-.flow-node-label{font-size:.85rem;font-weight:600;color:var(--white)}
-.flow-node-sub{font-size:.76rem;color:var(--muted);margin-top:1px}
-
-/* WEB3 */
-.web3-strip{
-  background:linear-gradient(135deg,rgba(10,31,69,.9),rgba(6,21,45,.95));
-  border:1px solid var(--border);border-radius:14px;
-  padding:40px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;
-  position:relative;overflow:hidden;
-}
-.web3-strip::before{
-  content:'';position:absolute;right:-80px;top:-80px;
-  width:300px;height:300px;border-radius:50%;
-  background:radial-gradient(circle,rgba(230,0,122,.1),transparent 70%);
-  pointer-events:none;
-}
-.web3-strip h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;letter-spacing:-.03em;line-height:1.15;margin-bottom:16px;color:var(--white)}
-.web3-strip p{font-size:.95rem;line-height:1.7;color:var(--muted);margin-bottom:24px}
-.chain-items{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.chain-item{
-  display:flex;align-items:center;gap:10px;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-  border-radius:8px;padding:12px;font-size:.85rem;
-  transition:border-color .2s;
-}
-.chain-item:hover{border-color:var(--cyan)}
-.chain-item .ci-label{font-weight:600;color:var(--white)}
-.chain-item .ci-sub{font-size:.76rem;color:var(--muted);margin-top:2px}
-.chain-item .ci-icon{font-size:18px;flex-shrink:0}
-
-/* POLKADOT BAR */
-.polkadot-bar{
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  background:rgba(230,0,122,.07);border:1px solid rgba(230,0,122,.2);
-  border-radius:10px;padding:20px 28px;margin-top:16px;flex-wrap:wrap;
-}
-.polkadot-left{display:flex;align-items:center;gap:14px}
-.polkadot-logo{width:36px;height:36px;border-radius:50%;background:var(--pink);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.polkadot-text strong{display:block;font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:var(--white)}
-.polkadot-text span{font-size:.82rem;color:rgba(255,150,200,.8)}
-
-/* ROADMAP */
-.roadmap{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.phase{
-  border:1px solid var(--border);border-radius:var(--r);padding:22px 18px;
-  position:relative;background:rgba(10,31,69,.4);transition:border-color .3s;
-}
-.phase:hover{border-color:var(--cyan)}
-.phase-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
-.phase h4{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:8px;color:var(--white)}
-.phase p{font-size:.82rem;line-height:1.6;color:var(--muted)}
-.phase-active{border-color:rgba(43,179,255,.4);background:rgba(43,179,255,.05)}
-.phase-active::after{
-  content:'NOW';position:absolute;top:14px;right:14px;
-  font-size:9px;font-weight:700;letter-spacing:.1em;
-  background:var(--cyan);color:var(--navy);padding:2px 7px;border-radius:4px;
-}
-
-/* MANIFESTO */
-.manifesto{
-  border:1px solid var(--border);border-radius:14px;
-  padding:48px;text-align:center;position:relative;overflow:hidden;
-  background:rgba(10,31,69,.4);
-}
-.manifesto::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(43,179,255,.06),transparent);
-}
-.manifesto blockquote{
-  font-family:'Syne',sans-serif;font-size:clamp(1.15rem,2.5vw,1.65rem);
-  font-weight:700;line-height:1.45;letter-spacing:-.02em;
-  color:var(--white);max-width:800px;margin:0 auto 20px;
-  position:relative;z-index:1;
-}
-.manifesto blockquote em{color:var(--cyan);font-style:normal}
-.manifesto cite{font-size:.85rem;color:var(--muted);display:block;position:relative;z-index:1}
-
-footer{
-  border-top:1px solid var(--border);padding:32px 0 0;
-  display:flex;align-items:center;justify-content:space-between;
-  gap:16px;flex-wrap:wrap;
-}
-.footer-left{display:flex;align-items:center;gap:10px}
-.footer-tagline{font-size:.85rem;color:var(--muted)}
-.footer-links{display:flex;gap:20px}
-.footer-links a{font-size:.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
-.footer-links a:hover{color:var(--cyan)}
-.divider{height:1px;background:var(--border)}
-.fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
-.fade-up.visible{opacity:1;transform:none}
-
-@media(max-width:900px){
-  .hero{grid-template-columns:1fr}.hero-visual{display:none}
-  .pillars,.how-grid,.web3-strip,.chain-items{grid-template-columns:1fr}
-  .roadmap{grid-template-columns:1fr 1fr}
-}
-@media(max-width:600px){
-  .roadmap{grid-template-columns:1fr}
-  .splash-choices{flex-direction:column;align-items:center}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dotify Lab — Dotification, Web3 Music & Common Value</title>
+  <meta name="description" content="Dotify Lab is a living Web3 product and research journal exploring Dotification, shared listening, AI, Proof of Personhood, Ubuntu and Maâtocratic product design." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --navy:#06152d;--navy2:#0a1f45;--cyan:#2bb3ff;--cyan2:rgba(43,179,255,.15);--cyan3:rgba(43,179,255,.06);
+      --pink:#e6007a;--pink2:rgba(230,0,122,.12);--green:#c8ff4d;--gold:#e8c86a;--white:#fff;--off:#f0f6ff;
+      --muted:rgba(255,255,255,.68);--muted2:rgba(255,255,255,.44);--border:rgba(43,179,255,.18);--r:14px;--max:1180px;
+    }
+    html{scroll-behavior:smooth} body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;overflow-x:hidden}
+    a{color:inherit}.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 62% 48% at 12% 6%,rgba(43,179,255,.18),transparent),radial-gradient(ellipse 48% 58% at 88% 76%,rgba(230,0,122,.13),transparent),radial-gradient(ellipse 42% 42% at 78% 18%,rgba(200,255,77,.06),transparent),var(--navy)}
+    .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:220px}
+    #root{position:relative;z-index:2}.wrap{max-width:var(--max);margin:0 auto;padding:0 24px 72px}
+    .top-nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(18px);background:rgba(6,21,45,.76);border-bottom:1px solid var(--border)}
+    .top-inner{max-width:var(--max);margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none}.brand-dot{width:32px;height:32px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;font-family:'Syne';font-weight:800;color:var(--navy);box-shadow:0 0 28px rgba(43,179,255,.45);animation:pulse 3s ease-in-out infinite}.brand-name{font-family:'Syne';font-weight:800;font-size:20px;letter-spacing:-.02em}.brand-sub{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-top:-2px}@keyframes pulse{0%,100%{box-shadow:0 0 20px rgba(43,179,255,.38)}50%{box-shadow:0 0 48px rgba(43,179,255,.75),0 0 80px rgba(43,179,255,.18)}}
+    .nav-links{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.nav-links a,.lang-btn{font-size:12px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:7px 11px;background:rgba(10,31,69,.65);transition:.2s;cursor:pointer}.nav-links a:hover,.lang-btn:hover,.lang-btn.active{color:var(--navy);background:var(--cyan);border-color:var(--cyan)}
+    .hero{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(330px,.92fr);gap:44px;align-items:center;padding:78px 0 52px;border-bottom:1px solid var(--border)}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--cyan2);border:1px solid var(--border);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:24px}.eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:blink 2s ease-in-out infinite}@keyframes blink{0%,100%{opacity:1}50%{opacity:.32}}
+    h1{font-family:'Syne';font-weight:800;font-size:clamp(3rem,7vw,6rem);line-height:.92;letter-spacing:-.06em;margin-bottom:22px}.accent{color:var(--cyan)}.accent-pink{color:var(--pink)}.accent-green{color:var(--green)}.accent-gold{color:var(--gold)}
+    .lead{font-size:1.08rem;line-height:1.78;color:var(--muted);max-width:650px}.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:10px;text-decoration:none;border:1px solid var(--border);font-weight:700;transition:.2s}.btn-primary{background:var(--cyan);border-color:var(--cyan);color:var(--navy);box-shadow:0 8px 32px rgba(43,179,255,.35)}.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 42px rgba(43,179,255,.48)}.btn-secondary{background:rgba(10,31,69,.6);color:var(--white)}.btn-secondary:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan2)}
+    .field-card{position:relative;min-height:430px;border:1px solid var(--border);border-radius:20px;background:linear-gradient(180deg,rgba(10,31,69,.78),rgba(6,21,45,.88));overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.24)}.field-card canvas{position:absolute;inset:0;width:100%;height:100%}.field-overlay{position:absolute;inset:auto 18px 18px 18px;background:rgba(6,21,45,.74);border:1px solid var(--border);border-radius:14px;padding:16px;backdrop-filter:blur(12px)}.field-title{font-family:'Syne';font-weight:800;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}.field-copy{font-size:.9rem;line-height:1.55;color:var(--muted)}
+    .section{padding:58px 0;border-bottom:1px solid var(--border)}.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}.label{font-family:'Syne';font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);font-size:.9rem}.section-title{font-family:'Syne';font-weight:800;font-size:clamp(1.8rem,4vw,3rem);letter-spacing:-.04em;line-height:1.05;margin-top:8px}.section-intro{max-width:680px;color:var(--muted);line-height:1.75}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.card{border:1px solid var(--border);border-radius:var(--r);padding:24px;background:rgba(10,31,69,.52);position:relative;overflow:hidden;transition:.25s}.card:hover{transform:translateY(-3px);border-color:rgba(43,179,255,.48);background:rgba(10,31,69,.72)}.card::before{content:'';position:absolute;inset:0;opacity:0;background:radial-gradient(ellipse 70% 70% at 50% 0%,rgba(43,179,255,.08),transparent);transition:.25s}.card:hover::before{opacity:1}.card>*{position:relative;z-index:1}.card-icon{font-size:28px;margin-bottom:14px;display:block}.card h3{font-family:'Syne';font-weight:800;font-size:1.05rem;margin-bottom:10px}.card p{font-size:.94rem;line-height:1.72;color:var(--muted)}
+    .definition{display:grid;grid-template-columns:1fr 1fr;gap:18px}.definition .big-card{border:1px solid rgba(200,255,77,.18);border-radius:18px;padding:32px;background:linear-gradient(145deg,rgba(200,255,77,.07),rgba(10,31,69,.55))}.big-card h3{font-family:'Syne';font-size:1.45rem;margin-bottom:14px}.big-card p{color:var(--muted);line-height:1.78}.formula{font-family:'Syne';font-weight:800;font-size:clamp(1.6rem,4vw,3rem);letter-spacing:-.05em;line-height:1.1;margin-top:20px}.formula span{display:block}.compare{display:grid;gap:12px}.compare-row{padding:18px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.035)}.compare-row strong{display:block;color:var(--cyan);font-family:'Syne';margin-bottom:6px}.compare-row p{color:var(--muted);line-height:1.6}
+    .blog-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}.chip{border:1px solid var(--border);background:rgba(10,31,69,.6);color:var(--muted);border-radius:999px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase}.chip.active,.chip:hover{background:var(--cyan);color:var(--navy);border-color:var(--cyan)}
+    .post-card{cursor:pointer}.post-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.tag{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:5px 8px;background:var(--pink2);color:#ff8fc5;border:1px solid rgba(230,0,122,.28)}.date{font-size:12px;color:var(--muted2)}.post-card h3{font-size:1.2rem;line-height:1.2}.post-card p{margin-top:10px}.read-more{display:inline-flex;margin-top:14px;color:var(--cyan);font-weight:700;font-size:.92rem}
+    .timeline{display:grid;gap:14px}.log{display:grid;grid-template-columns:120px 1fr;gap:18px;border:1px solid var(--border);border-radius:14px;padding:18px;background:rgba(10,31,69,.42)}.log-date{font-family:'Syne';font-weight:800;color:var(--cyan)}.log h3{font-family:'Syne';margin-bottom:6px}.log p{color:var(--muted);line-height:1.62}.status{display:inline-flex;margin-top:10px;border-radius:999px;border:1px solid rgba(200,255,77,.25);background:rgba(200,255,77,.08);color:var(--green);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:5px 8px}
+    .manifesto{border:1px solid var(--border);border-radius:22px;padding:46px;text-align:center;background:radial-gradient(ellipse 70% 80% at 50% 100%,rgba(43,179,255,.08),rgba(10,31,69,.42));}.manifesto blockquote{font-family:'Syne';font-weight:800;font-size:clamp(1.35rem,3vw,2.1rem);line-height:1.35;letter-spacing:-.03em;max-width:900px;margin:0 auto 18px}.manifesto cite{color:var(--muted)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:50;display:flex;align-items:center;justify-content:center;padding:22px}.modal{width:min(820px,100%);max-height:86vh;overflow:auto;border:1px solid var(--border);border-radius:20px;background:#081a38;box-shadow:0 30px 90px rgba(0,0,0,.45);padding:28px}.modal-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:18px}.close{border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--white);border-radius:999px;width:34px;height:34px;cursor:pointer}.modal h2{font-family:'Syne';font-size:2rem;letter-spacing:-.04em;margin-bottom:14px}.modal p{color:var(--muted);line-height:1.75;margin:12px 0}.modal ul{margin:16px 0 0 20px;color:var(--muted);line-height:1.7}
+    footer{padding:34px 0 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--muted)}.footer-links{display:flex;gap:18px;flex-wrap:wrap}.footer-links a{font-size:.9rem;text-decoration:none;color:var(--muted)}.footer-links a:hover{color:var(--cyan)}
+    @media(max-width:930px){.hero,.definition,.grid-2{grid-template-columns:1fr}.field-card{min-height:360px}.grid-3{grid-template-columns:1fr 1fr}.section-head{display:block}.nav-links a{display:none}.log{grid-template-columns:1fr}}
+    @media(max-width:640px){.top-inner{align-items:flex-start}.grid-3{grid-template-columns:1fr}.wrap{padding:0 18px 56px}.hero{padding-top:46px}.field-card{min-height:320px}.manifesto{padding:28px}.nav-links{justify-content:flex-end}.brand-sub{display:none}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.brand-dot{animation:none}.eyebrow::before{animation:none}.field-card canvas{display:none}.card:hover{transform:none}}
+  </style>
 </head>
 <body>
-<div class="bg-mesh"></div>
-<div class="grain"></div>
+  <div class="bg-mesh"></div><div class="grain"></div><div id="root"></div>
+  <script type="text/babel">
+    const {useEffect,useMemo,useRef,useState} = React;
 
-<!-- LANG SPLASH -->
-<div id="lang-splash">
-  <div class="splash-brand">
-    <div class="splash-dot">◉</div>
-    <span class="splash-name">Dotify</span>
-  </div>
-  <p class="splash-tagline">Let the music connect the dots — choose your language / choisissez votre langue</p>
-  <div class="splash-choices">
-    <button class="splash-btn" onclick="chooseLang('en')">
-      <span class="flag">🇬🇧</span>
-      <span class="lbl">English</span>
-      <span class="sub">Continue in English</span>
-    </button>
-    <button class="splash-btn" onclick="chooseLang('fr')">
-      <span class="flag">🇫🇷</span>
-      <span class="lbl">Français</span>
-      <span class="sub">Continuer en français</span>
-    </button>
-  </div>
-</div>
+    const copy = {
+      en: {
+        navSubtitle: 'Living product journal',
+        heroEyebrow: 'Dotify Lab · Faire DOT, faire commun',
+        heroTitle1: 'Connect the', heroTitle2: 'dots', heroTitle3: 'of shared value.',
+        heroLead: 'Dotify Lab is a living Web3 product and research journal exploring Dotification: the art of turning music, cultural moments and human contributions into shared, verifiable and common value.',
+        explore: 'Explore the lab', read: 'Read notes', fieldTitle: 'Dotification field', fieldCopy: 'Each dot is a possible common: a song, a room, an artist, a proof, a contribution, a memory. The lab connects them without reducing value to speculation.',
+        dotification: 'Dotification', dotificationTitle: 'Beyond tokenization.', dotificationIntro: 'Tokenization often asks how something can become tradable. Dotification asks how something can become related, verifiable, responsible and common.',
+        tokenTitle: 'Tokenization', tokenText: 'To make something exchangeable, often through financial abstraction, liquidity and market logic.', dotTitle: 'Dotification', dotText: 'To make a relation, work, contribution or cultural moment visible as shared value: connected, accountable and alive.',
+        productTitle: 'The product gesture', productIntro: 'Dotify begins with a simple experience, then hides the deeper Web3 infrastructure under the surface.',
+        researchTitle: 'Research notes', researchIntro: 'A blog space for practical philosophy, technopoetry, AI-age questions, Web3 culture, Ubuntu and Maâtocratic design.',
+        buildTitle: 'Build log', buildIntro: 'The project must remain buildable. Philosophy enters the code through production boundaries, small iterations and honest limitations.',
+        manifesto: 'We do not Dotify the world to tokenize everything. We Dotify to reconnect value with relation, proof with responsibility, technology with culture, and music with the human presence it was never meant to lose.',
+        footer: 'Dotify Lab — product notes, build logs and technopoetic research toward a Web3 music commons.'
+      },
+      fr: {
+        navSubtitle: 'Journal produit vivant',
+        heroEyebrow: 'Dotify Lab · Faire DOT, faire commun',
+        heroTitle1: 'Relier les', heroTitle2: 'points', heroTitle3: 'de la valeur commune.',
+        heroLead: 'Dotify Lab est un journal vivant de produit et de recherche Web3 consacré à la Dotification : l’art de transformer la musique, les moments culturels et les contributions humaines en valeur commune, vérifiable et partageable.',
+        explore: 'Explorer le lab', read: 'Lire les notes', fieldTitle: 'Champ de Dotification', fieldCopy: 'Chaque dot est un commun possible : un morceau, une room, un artiste, une preuve, une contribution, une mémoire. Le lab les relie sans réduire la valeur à la spéculation.',
+        dotification: 'Dotification', dotificationTitle: 'Au-delà de la tokenization.', dotificationIntro: 'La tokenization demande souvent comment rendre quelque chose échangeable. La Dotification demande comment rendre quelque chose relié, vérifiable, responsable et commun.',
+        tokenTitle: 'Tokenization', tokenText: 'Rendre quelque chose échangeable, souvent par abstraction financière, liquidité et logique de marché.', dotTitle: 'Dotification', dotText: 'Rendre une relation, une œuvre, une contribution ou un moment culturel visible comme valeur commune : reliée, responsable et vivante.',
+        productTitle: 'Le geste produit', productIntro: 'Dotify commence par une expérience simple, puis rend l’infrastructure Web3 presque invisible sous la surface.',
+        researchTitle: 'Notes de recherche', researchIntro: 'Un espace-blog pour philosophie pratique, technopoésie, questions de l’âge IA, culture Web3, Ubuntu et design maâtocratique.',
+        buildTitle: 'Build log', buildIntro: 'Le projet doit rester constructible. La philosophie entre dans le code par les frontières de production, les petites itérations et les limites honnêtes.',
+        manifesto: 'Nous ne Dotifions pas le monde pour tout tokeniser. Nous Dotifions pour relier la valeur à la relation, la preuve à la responsabilité, la technologie à la culture, et la musique à cette présence humaine qu’elle n’aurait jamais dû perdre.',
+        footer: 'Dotify Lab — notes produit, journal de construction et recherche technopoétique vers un commun musical Web3.'
+      }
+    };
 
-<!-- MAIN APP -->
-<div id="app">
-<div class="wrap">
+    const productPillars = [
+      {icon:'🎧', title:'Shared listening', fr:'Écoute partagée', text:'Create a room → share a link → listen together.', textFr:'Créer une room → partager un lien → écouter ensemble.'},
+      {icon:'🎤', title:'Artist sovereignty', fr:'Souveraineté artiste', text:'Artist-owned SmartRuntimes, access policies and auditable royalties.', textFr:'SmartRuntimes artistes, politiques d’accès et royalties auditables.'},
+      {icon:'🔐', title:'Invisible trust', fr:'Confiance invisible', text:'Web3 is felt as trust, not bureaucracy.', textFr:'Le Web3 se ressent comme confiance, pas comme bureaucratie.'}
+    ];
 
-  <!-- NAV -->
-  <nav>
-    <a class="nav-brand" href="#">
-      <div class="brand-dot">◉</div>
-      <span class="brand-name">Dotify</span>
-    </a>
-    <div class="nav-right">
-      <span class="nav-tag">Polkadot</span>
-      <div class="lang-switch">
-        <button id="btn-en" onclick="switchLang('en')">EN</button>
-        <button id="btn-fr" onclick="switchLang('fr')">FR</button>
-      </div>
-    </div>
-  </nav>
+    const posts = [
+      {id:'dotification', tag:'Dotification', date:'Founding note', title:'What does it mean to Faire DOT?', frTitle:'Que signifie Faire DOT ?', excerpt:'A first note on Dotification as the move from hyper-financialized tokenization toward common, shared and responsible value.', frExcerpt:'Première note sur la Dotification comme passage de la tokenization hyper-financiarisée vers une valeur commune, partagée et responsable.', body:['To Faire DOT is not only to use DOT as an asset. It is to ask how value can become a point of relation: visible, connected, verifiable and common.','Dotification is the attempt to turn cultural moments, human contributions and shared experiences into forms of value that do not immediately collapse into speculation.','Dotify begins with music because music already knows how to connect bodies, memories and worlds.']},
+      {id:'ai-personhood', tag:'AI & Personhood', date:'Research note', title:'Why AI makes Proof of Personhood more relevant', frTitle:'Pourquoi l’IA rend la Proof of Personhood plus pertinente', excerpt:'The AI age forces us to rethink human presence, authorship, origin and contribution. Web3 may become a cultural infrastructure of verification.', frExcerpt:'L’âge de l’IA nous force à repenser présence humaine, auteur, origine et contribution. Le Web3 peut devenir une infrastructure culturelle de vérification.', body:['AI does not only automate production. It unsettles trust. Who created? Who contributed? Who is present? Who is human?','Proof of Personhood should not become surveillance theater. Its deeper promise is to protect human agency without reducing humans to data points.','Dotify asks whether verified humanity can serve access, dignity and Ubuntu rather than control.']},
+      {id:'maatocracy', tag:'Maâtocracy', date:'Design note', title:'Maât as a product design framework', frTitle:'La Maât comme framework produit', excerpt:'Truth, balance, justice, reciprocity and harmony can become practical product constraints, not decorative mythology.', frExcerpt:'Vérité, équilibre, justice, réciprocité et harmonie peuvent devenir des contraintes produit pratiques, pas une mythologie décorative.', body:['A Maâtocratic product does not ask only if something is technically possible. It asks whether the system creates balance, truth and responsible relation.','For Dotify, this means honest security boundaries, fair artist sovereignty, low-friction listening and transparent value flows.','Maât enters the product through small decisions: error messages, access checks, royalties, consent and user dignity.']},
+      {id:'music-commons', tag:'Commons', date:'Cultural note', title:'Music as relation, not only content', frTitle:'La musique comme relation, pas seulement contenu', excerpt:'Dotify starts from the intuition that music can reopen a commons inside algorithmic isolation.', frExcerpt:'Dotify part de l’intuition que la musique peut rouvrir un commun dans l’isolement algorithmique.', body:['Music is not only content. It is memory, identity, invitation and passage.','When someone lets another person listen with them, they open a temporary doorway into their world.','A listening room is therefore not a feature. It is the village square of Dotify.']}
+    ];
 
-  <!-- HERO -->
-  <section class="hero fade-up">
-    <div class="hero-copy">
-      <div class="hero-eyebrow"><span class="t" data-en="Decentralized Cultural Hub" data-fr="Hub culturel décentralisé"></span></div>
-      <h1>Let the music<br><em class="accent">connect</em><br>the <em class="accent-pink">dots.</em></h1>
-      <p class="hero-desc t" data-en="Dotify combines real-time social listening, artist sovereignty, and decentralized infrastructure on Polkadot — without ever sacrificing the simplicity of the experience." data-fr="Dotify réunit écoute sociale en temps réel, souveraineté des artistes et infrastructure décentralisée sur Polkadot — sans jamais sacrifier la simplicité de l'expérience."></p>
-      <div class="hero-ctas">
-        <a href="#how" class="btn-primary t" data-en="Explore →" data-fr="Découvrir →"></a>
-        <a href="#web3" class="btn-secondary t" data-en="Web3 Architecture" data-fr="Architecture Web3"></a>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="rooms-card">
-        <div class="rooms-header">
-          <span class="rooms-title">Live Rooms</span>
-          <span class="live-badge">3 LIVE</span>
-        </div>
-        <div class="room-item">
-          <div class="room-avatar" style="background:rgba(43,179,255,.15)">🎵</div>
-          <div class="room-info">
-            <div class="room-name">Afrobeat Session</div>
-            <div class="room-meta">Kongo Pulse · Classic</div>
-          </div>
-          <span class="room-listeners">12 👂</span>
-        </div>
-        <div class="room-item">
-          <div class="room-avatar" style="background:rgba(230,0,122,.12)">🎸</div>
-          <div class="room-info">
-            <div class="room-name">Midnight Jazz</div>
-            <div class="room-meta">Dotify Artist · Human Free</div>
-          </div>
-          <span class="room-listeners">7 👂</span>
-        </div>
-        <div class="room-item">
-          <div class="room-avatar" style="background:rgba(200,255,77,.1)">🎹</div>
-          <div class="room-info">
-            <div class="room-name">Lisbon Signal</div>
-            <div class="room-meta">Wave Collective · Classic</div>
-          </div>
-          <span class="room-listeners">4 👂</span>
-        </div>
-        <div class="hero-stat-row">
-          <div class="mini-stat"><strong>2.5Md</strong><span class="t" data-en="transit users" data-fr="usagers TC"></span></div>
-          <div class="mini-stat"><strong>250k</strong><span class="t" data-en="18-mo target" data-fr="obj. 18 mois"></span></div>
-          <div class="mini-stat"><strong>100%</strong><span>on-chain</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
+    const logs = [
+      {date:'Now', title:'From dashboard to Dotify Lab', text:'The project becomes a living space for product, build notes, Dotification research, AI/personhood and Maâtocratic design.', status:'live'},
+      {date:'Phase 1', title:'Production spine', text:'Backend boundary, server-side uploads, protected audio direction, wallet-signed key delivery and hosted rooms.', status:'building'},
+      {date:'Phase 2', title:'Stabilization', text:'Critical tests for artist publish, Classic unlock, preview/full playback and room join flows.', status:'next'},
+      {date:'Phase 3', title:'Differentiation', text:'Live Proof of Personhood, ambassadors as cultural transmitters, and commons-oriented social propagation.', status:'research'}
+    ];
 
-  <!-- PILLARS -->
-  <div class="section-label fade-up">
-    <h2 class="t" data-en="The three pillars" data-fr="Les trois piliers"></h2>
-  </div>
-  <div class="pillars fade-up">
-    <div class="pillar">
-      <span class="pillar-icon">🎧</span>
-      <h3 class="t" data-en="Social Listening" data-fr="Écoute sociale"></h3>
-      <p class="t" data-en="A real-time listening room: a host streams, others join. No account, no friction — just a shared link." data-fr="Une salle d'écoute en temps réel : un hôte diffuse, d'autres rejoignent. Sans compte, sans friction, avec un simple lien partagé."></p>
-    </div>
-    <div class="pillar pillar-pink">
-      <span class="pillar-icon">🎤</span>
-      <h3 class="t" data-en="Artist Sovereignty" data-fr="Souveraineté artiste"></h3>
-      <p class="t" data-en="Each artist owns a personal SmartRuntime — their contract, their access rules, transparent royalties, no intermediary." data-fr="Chaque artiste possède un SmartRuntime personnel — son contrat, ses règles d'accès, ses royalties transparentes, sans intermédiaire."></p>
-    </div>
-    <div class="pillar pillar-green">
-      <span class="pillar-icon">🔗</span>
-      <h3 class="t" data-en="Web3 Infrastructure" data-fr="Infrastructure Web3"></h3>
-      <p class="t" data-en="Polkadot as foundation: programmable access, on-chain rights, automatic payments, and native cross-chain interoperability." data-fr="Polkadot comme fondation : accès programmable, droits on-chain, paiements automatiques et interopérabilité native entre chaînes."></p>
-    </div>
-  </div>
-
-  <div class="divider" style="margin:48px 0"></div>
-
-  <!-- HOW IT WORKS -->
-  <div class="section-label fade-up" id="how">
-    <h2 class="t" data-en="How it works" data-fr="Comment ça marche"></h2>
-  </div>
-  <div class="how-grid fade-up">
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-body">
-          <h4 class="t" data-en="Open a room" data-fr="Ouvrir une room"></h4>
-          <p class="t" data-en="The host selects a track and opens a room in one tap. A short link is generated instantly." data-fr="L'hôte sélectionne un titre et lance une room en un tap. Un lien court est généré instantanément."></p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-body">
-          <h4 class="t" data-en="Listeners join" data-fr="Les auditeurs rejoignent"></h4>
-          <p class="t" data-en="Via the link or code. No wallet needed to listen. Audio streams peer-to-peer via WebRTC." data-fr="Via le lien ou le code. Pas de wallet requis pour écouter. La musique part directement de l'hôte via WebRTC."></p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-body">
-          <h4 class="t" data-en="Access verified on-chain" data-fr="Accès vérifié on-chain"></h4>
-          <p class="t" data-en="The artist's contract determines full playback rights. DOT payment or Proof of Personhood." data-fr="Le contrat de l'artiste détermine qui peut écouter en intégralité. Paiement DOT ou Preuve de Présence humaine."></p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-body">
-          <h4 class="t" data-en="Royalties distributed" data-fr="Les royalties se distribuent"></h4>
-          <p class="t" data-en="On every paid listen, the smart contract immediately distributes payments to configured rights-holders." data-fr="À chaque écoute payante, le smart contract distribue immédiatement les paiements aux ayants-droit configurés."></p>
-        </div>
-      </div>
-    </div>
-    <div class="flow-visual">
-      <div class="flow-title t" data-en="Technical flow" data-fr="Flux technique"></div>
-      <div class="flow-chain">
-        <div class="flow-node">
-          <div class="flow-node-dot dot-cyan">📱</div>
-          <div><div class="flow-node-label">React Native App</div><div class="flow-node-sub">iOS · Android</div></div>
-        </div>
-        <div class="flow-node">
-          <div class="flow-node-dot dot-cyan">📡</div>
-          <div><div class="flow-node-label">WebRTC P2P Stream</div><div class="flow-node-sub t" data-en="Direct audio, DTLS-SRTP encrypted" data-fr="Audio direct, chiffré DTLS-SRTP"></div></div>
-        </div>
-        <div class="flow-node">
-          <div class="flow-node-dot dot-pink">🔐</div>
-          <div><div class="flow-node-label">SmartRuntime (EVM)</div><div class="flow-node-sub">Paseo Asset Hub · chainId 420420417</div></div>
-        </div>
-        <div class="flow-node">
-          <div class="flow-node-dot dot-pink">💎</div>
-          <div><div class="flow-node-label">ArtistDirectory</div><div class="flow-node-sub t" data-en="Artist → runtime index" data-fr="Index artiste → runtime"></div></div>
-        </div>
-        <div class="flow-node">
-          <div class="flow-node-dot dot-green">🌐</div>
-          <div><div class="flow-node-label">IPFS / Pinata</div><div class="flow-node-sub t" data-en="Encrypted audio · metadata" data-fr="Audio chiffré · métadonnées"></div></div>
-        </div>
-        <div class="flow-node">
-          <div class="flow-node-dot dot-green">📜</div>
-          <div><div class="flow-node-label">Bulletin Chain</div><div class="flow-node-sub t" data-en="Immutable rights archive" data-fr="Archive immuable des droits"></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider" style="margin:48px 0"></div>
-
-  <!-- WEB3 -->
-  <div id="web3" class="web3-strip fade-up">
-    <div>
-      <h2 class="t" data-en="Polkadot as the backbone" data-fr="Polkadot comme colonne vertébrale"></h2>
-      <p class="t" data-en="Web3 stays invisible to the end user. But beneath the surface, every listen, every payment, every rights record is anchored in a public and verifiable infrastructure." data-fr="Le Web3 reste invisible pour l'utilisateur final. Mais sous la surface, chaque écoute, chaque paiement, chaque droits d'auteur est ancré dans une infrastructure publique et vérifiable."></p>
-      <a href="https://polkadot.network" class="btn-primary" target="_blank">Polkadot →</a>
-    </div>
-    <div class="chain-items">
-      <div class="chain-item"><span class="ci-icon">💠</span><div><div class="ci-label">SmartRuntime</div><div class="ci-sub t" data-en="1 contract per artist" data-fr="1 contrat par artiste"></div></div></div>
-      <div class="chain-item"><span class="ci-icon">🔀</span><div><div class="ci-label">XCM</div><div class="ci-sub t" data-en="Native cross-chain" data-fr="Inter-chaînes natif"></div></div></div>
-      <div class="chain-item"><span class="ci-icon">👤</span><div><div class="ci-label">Proof of Personhood</div><div class="ci-sub t" data-en="Verified human access" data-fr="Accès humain vérifié"></div></div></div>
-      <div class="chain-item"><span class="ci-icon">📋</span><div><div class="ci-label">OpenGov</div><div class="ci-sub t" data-en="On-chain governance" data-fr="Gouvernance on-chain"></div></div></div>
-      <div class="chain-item"><span class="ci-icon">🗜️</span><div><div class="ci-label">ink! / revive</div><div class="ci-sub t" data-en="PolkaVM contracts" data-fr="Contrats PolkaVM"></div></div></div>
-      <div class="chain-item"><span class="ci-icon">📡</span><div><div class="ci-label">Bulletin Chain</div><div class="ci-sub t" data-en="Permanent archive" data-fr="Archive permanente"></div></div></div>
-    </div>
-  </div>
-
-  <div class="polkadot-bar fade-up">
-    <div class="polkadot-left">
-      <div class="polkadot-logo">⬡</div>
-      <div class="polkadot-text">
-        <strong class="t" data-en="Built in the Polkadot spirit" data-fr="Construit dans l'esprit Polkadot"></strong>
-        <span class="t" data-en="Dotify is not 'crypto because crypto'. It's music using crypto where it truly matters." data-fr="Dotify n'est pas « crypto parce que crypto ». C'est de la musique qui utilise la crypto là où ça compte vraiment."></span>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider" style="margin:48px 0"></div>
-
-  <!-- ROADMAP -->
-  <div class="section-label fade-up">
-    <h2>Roadmap</h2>
-  </div>
-  <div class="roadmap fade-up">
-    <div class="phase phase-active">
-      <div class="phase-num">Phase 1</div>
-      <h4 class="t" data-en="Production Spine" data-fr="Colonne vertébrale"></h4>
-      <p class="t" data-en="Key backend, server-side Pinata uploads, content-key delivery, hosted signaling." data-fr="Backend de clés, uploads Pinata côté serveur, livraison des clés de contenu, signaling hébergé."></p>
-    </div>
-    <div class="phase">
-      <div class="phase-num">Phase 2</div>
-      <h4 class="t" data-en="Stabilization" data-fr="Stabilisation"></h4>
-      <p class="t" data-en="E2E tests: Classic unlock, artist publish, rooms. Frontend module refactor." data-fr="Tests E2E Classic unlock, publication artiste, rooms. Refactoring modules frontend."></p>
-    </div>
-    <div class="phase">
-      <div class="phase-num">Phase 3</div>
-      <h4 class="t" data-en="Differentiation" data-fr="Différenciation"></h4>
-      <p class="t" data-en="Live Proof of Personhood, ambassadors, room resilience, observability." data-fr="Proof of Personhood live, ambassadeurs, résilience des rooms, observabilité."></p>
-    </div>
-    <div class="phase">
-      <div class="phase-num">Phase 4</div>
-      <h4 class="t" data-en="Ecosystem" data-fr="Écosystème"></h4>
-      <p class="t" data-en="Dotify DAO, staking-subscription, P2P relays, artist APIs, live events." data-fr="DAO Dotify, staking-abonnement, relais P2P, API artistes, événements live."></p>
-    </div>
-  </div>
-
-  <div class="divider" style="margin:48px 0"></div>
-
-  <!-- MANIFESTO -->
-  <div class="manifesto fade-up">
-    <blockquote class="t"
-      data-en='"We do not only want to <em>listen</em> to music.<br>We want music to bring us back into <em>presence</em>,<br>into relation, into the shared pulse of the world."'
-      data-fr='"Nous ne voulons pas seulement <em>écouter</em> de la musique.<br>Nous voulons que la musique nous ramène à la <em>présence</em>,<br>à la relation, au pouls partagé du monde."'>
-    </blockquote>
-    <cite>— Dotify Manifesto</cite>
-  </div>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-left">
-      <div class="brand-dot" style="width:24px;height:24px;font-size:10px">◉</div>
-      <span class="footer-tagline t" data-en="Dotify — Music. Presence. Decentralized culture." data-fr="Dotify — Musique. Présence. Culture décentralisée."></span>
-    </div>
-    <div class="footer-links">
-      <a href="#">GitHub</a>
-      <a href="#">docs.dotify</a>
-      <a href="#">Polkadot</a>
-      <a href="#">IPFS</a>
-    </div>
-  </footer>
-
-</div><!-- wrap -->
-</div><!-- app -->
-
-<script>
-let currentLang = 'en';
-
-function applyLang(lang) {
-  currentLang = lang;
-  document.documentElement.lang = lang;
-  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-  document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
-
-  document.querySelectorAll('.t').forEach(el => {
-    const val = el.getAttribute('data-' + lang);
-    if (val !== null) {
-      el.innerHTML = val;
+    function DotField(){
+      const ref = useRef(null);
+      useEffect(()=>{
+        const canvas=ref.current; const ctx=canvas.getContext('2d'); let raf; let w=0,h=0;
+        const labels=['song','room','artist','DOT','proof','Ubuntu','Maât','rights','memory','commons','AI','presence','royalty','link','trust'];
+        const colors=['#2bb3ff','#e6007a','#c8ff4d','#e8c86a','#ffffff'];
+        const nodes=labels.map((label,i)=>({label,x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.00055,vy:(Math.random()-.5)*.00055,r:2.2+Math.random()*2.8,c:colors[i%colors.length]}));
+        const resize=()=>{const dpr=Math.min(window.devicePixelRatio||1,2); const b=canvas.getBoundingClientRect(); w=b.width; h=b.height; canvas.width=w*dpr; canvas.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0)};
+        const draw=()=>{ctx.clearRect(0,0,w,h); const t=Date.now()*0.0004; nodes.forEach((a,i)=>{a.x+=a.vx; a.y+=a.vy; if(a.x<.05||a.x>.95)a.vx*=-1; if(a.y<.08||a.y>.9)a.vy*=-1; for(let j=i+1;j<nodes.length;j++){const b=nodes[j]; const dx=(a.x-b.x)*w,dy=(a.y-b.y)*h; const dist=Math.hypot(dx,dy); if(dist<145){ctx.strokeStyle=`rgba(43,179,255,${(1-dist/145)*.24})`; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(a.x*w,a.y*h); ctx.lineTo(b.x*w,b.y*h); ctx.stroke();}}}); nodes.forEach((n,i)=>{const x=n.x*w,y=n.y*h; const pulse=1+Math.sin(t*4+i)*.22; ctx.beginPath(); ctx.fillStyle=n.c; ctx.globalAlpha=.9; ctx.arc(x,y,n.r*pulse,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=.16; ctx.beginPath(); ctx.arc(x,y,n.r*5.5*pulse,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=.9; ctx.font='11px DM Sans'; ctx.fillStyle='rgba(255,255,255,.7)'; ctx.fillText(n.label,x+9,y+4);}); ctx.globalAlpha=1; raf=requestAnimationFrame(draw)};
+        resize(); draw(); window.addEventListener('resize',resize); return()=>{cancelAnimationFrame(raf); window.removeEventListener('resize',resize)};
+      },[]);
+      return <canvas ref={ref} aria-hidden="true" />;
     }
-  });
-}
 
-function chooseLang(lang) {
-  applyLang(lang);
-  document.getElementById('lang-splash').classList.add('hidden');
-  const app = document.getElementById('app');
-  app.classList.add('visible');
-  // trigger fade-ups
-  setTimeout(() => {
-    document.querySelectorAll('.fade-up').forEach(el => {
-      const r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight) el.classList.add('visible');
-    });
-  }, 100);
-}
+    function App(){
+      const [lang,setLang]=useState('en'); const [filter,setFilter]=useState('All'); const [open,setOpen]=useState(null); const t=copy[lang];
+      const tags=useMemo(()=>['All',...new Set(posts.map(p=>p.tag))],[]); const visible=filter==='All'?posts:posts.filter(p=>p.tag===filter);
+      const local=(p,en,fr)=>lang==='fr'?(p[fr]||p[en]):p[en];
+      return <>
+        <header className="top-nav">
+          <div className="top-inner">
+            <a href="#top" className="brand"><span className="brand-dot">◉</span><span><span className="brand-name">Dotify Lab</span><span className="brand-sub">{t.navSubtitle}</span></span></a>
+            <nav className="nav-links" aria-label="main navigation">
+              <a href="#dotification">Dotification</a><a href="#product">Product</a><a href="#research">Research</a><a href="#build">Build</a><a href="#maat">Maât</a>
+              <button className={'lang-btn '+(lang==='en'?'active':'')} onClick={()=>setLang('en')}>EN</button><button className={'lang-btn '+(lang==='fr'?'active':'')} onClick={()=>setLang('fr')}>FR</button>
+            </nav>
+          </div>
+        </header>
+        <main id="top" className="wrap">
+          <section className="hero">
+            <div>
+              <div className="eyebrow">{t.heroEyebrow}</div>
+              <h1>{t.heroTitle1}<br/><span className="accent">{t.heroTitle2}</span><br/>{t.heroTitle3}</h1>
+              <p className="lead">{t.heroLead}</p>
+              <div className="cta-row"><a href="#dotification" className="btn btn-primary">{t.explore} →</a><a href="#research" className="btn btn-secondary">{t.read}</a></div>
+            </div>
+            <div className="field-card"><DotField/><div className="field-overlay"><div className="field-title">{t.fieldTitle}</div><p className="field-copy">{t.fieldCopy}</p></div></div>
+          </section>
 
-function switchLang(lang) {
-  applyLang(lang);
-}
+          <section id="dotification" className="section">
+            <div className="section-head"><div><div className="label">{t.dotification}</div><h2 className="section-title">{t.dotificationTitle}</h2></div><p className="section-intro">{t.dotificationIntro}</p></div>
+            <div className="definition">
+              <div className="big-card"><h3>{t.tokenTitle}</h3><p>{t.tokenText}</p><div className="formula"><span>make tradable</span><span className="accent-pink">extract value</span></div></div>
+              <div className="big-card"><h3>{t.dotTitle}</h3><p>{t.dotText}</p><div className="formula"><span>make visible</span><span className="accent-green">make common</span></div></div>
+            </div>
+            <div className="grid-3" style={{marginTop:18}}>
+              <div className="card"><span className="card-icon">💠</span><h3>DOT as relation</h3><p>{lang==='fr'?'Le DOT comme instrument de coordination de valeur commune, pas seulement comme actif financier.':'DOT as an instrument for coordinating common value, not only as a financial asset.'}</p></div>
+              <div className="card"><span className="card-icon">🧭</span><h3>Faire DOT</h3><p>{lang==='fr'?'Faire point commun : relier contribution, preuve, responsabilité et réciprocité.':'To make a common point: connecting contribution, proof, responsibility and reciprocity.'}</p></div>
+              <div className="card"><span className="card-icon">🌍</span><h3>Value as commons</h3><p>{lang==='fr'?'Sortir de la valeur isolée pour la réinscrire dans des relations humaines et culturelles.':'Moving value out of isolation and back into human and cultural relations.'}</p></div>
+            </div>
+          </section>
 
-// Scroll reveal
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
-</script>
+          <section id="product" className="section">
+            <div className="section-head"><div><div className="label">Product</div><h2 className="section-title">{t.productTitle}</h2></div><p className="section-intro">{t.productIntro}</p></div>
+            <div className="grid-3">{productPillars.map(p=><article className="card" key={p.title}><span className="card-icon">{p.icon}</span><h3>{lang==='fr'?p.fr:p.title}</h3><p>{lang==='fr'?p.textFr:p.text}</p></article>)}</div>
+          </section>
+
+          <section id="research" className="section">
+            <div className="section-head"><div><div className="label">Blog 3.0</div><h2 className="section-title">{t.researchTitle}</h2></div><p className="section-intro">{t.researchIntro}</p></div>
+            <div className="blog-toolbar">{tags.map(tag=><button key={tag} className={'chip '+(filter===tag?'active':'')} onClick={()=>setFilter(tag)}>{tag}</button>)}</div>
+            <div className="grid-2">{visible.map(p=><article className="card post-card" key={p.id} onClick={()=>setOpen(p)}><div className="post-meta"><span className="tag">{p.tag}</span><span className="date">{p.date}</span></div><h3>{local(p,'title','frTitle')}</h3><p>{local(p,'excerpt','frExcerpt')}</p><span className="read-more">{lang==='fr'?'Lire la note →':'Open note →'}</span></article>)}</div>
+          </section>
+
+          <section id="build" className="section">
+            <div className="section-head"><div><div className="label">Trackwork</div><h2 className="section-title">{t.buildTitle}</h2></div><p className="section-intro">{t.buildIntro}</p></div>
+            <div className="timeline">{logs.map(l=><div className="log" key={l.title}><div className="log-date">{l.date}</div><div><h3>{l.title}</h3><p>{l.text}</p><span className="status">{l.status}</span></div></div>)}</div>
+          </section>
+
+          <section id="maat" className="section">
+            <div className="section-head"><div><div className="label">Ubuntu · AI · Maâtocracy</div><h2 className="section-title">{lang==='fr'?'Technopoésie pratique.':'Practical technopoetry.'}</h2></div><p className="section-intro">{lang==='fr'?'L’IA rend plus urgente la question de la présence humaine. Dotify Lab explore comment le Web3, la Proof of Personhood, Ubuntu et la Maât peuvent orienter des produits qui augmentent notre humanité.':'AI makes the question of human presence more urgent. Dotify Lab explores how Web3, Proof of Personhood, Ubuntu and Maât can orient products that increase our humanity.'}</p></div>
+            <div className="grid-3"><div className="card"><span className="card-icon">🤖</span><h3>AI</h3><p>{lang==='fr'?'Que devient l’auteur, la présence et la confiance quand le synthétique prolifère ?':'What happens to authorship, presence and trust when the synthetic proliferates?'}</p></div><div className="card"><span className="card-icon">👤</span><h3>Proof of Personhood</h3><p>{lang==='fr'?'Prouver l’humain sans le réduire à un objet de surveillance.':'Recognizing the human without reducing humans to surveillance objects.'}</p></div><div className="card"><span className="card-icon">☥</span><h3>Maâtocracy</h3><p>{lang==='fr'?'Vérité, équilibre, justice, réciprocité et harmonie comme contraintes produit.':'Truth, balance, justice, reciprocity and harmony as product constraints.'}</p></div></div>
+          </section>
+
+          <section className="section"><div className="manifesto"><blockquote>{t.manifesto}</blockquote><cite>— Dotify Lab Manifesto</cite></div></section>
+          <footer><span>{t.footer}</span><div className="footer-links"><a href="https://github.com/knzeng-e/dotify" target="_blank">Dotify repo</a><a href="https://github.com/knzeng-e/dotify-dashboard" target="_blank">Lab repo</a><a href="https://polkadot.network" target="_blank">Polkadot</a></div></footer>
+        </main>
+        {open&&<div className="modal-backdrop" onClick={()=>setOpen(null)}><article className="modal" onClick={e=>e.stopPropagation()}><div className="modal-top"><span className="tag">{open.tag}</span><button className="close" onClick={()=>setOpen(null)}>×</button></div><h2>{local(open,'title','frTitle')}</h2><p><strong>{local(open,'excerpt','frExcerpt')}</strong></p>{open.body.map((b,i)=><p key={i}>{b}</p>)}<ul><li>{lang==='fr'?'Transformer cette note en article long.':'Expand this note into a long-form essay.'}</li><li>{lang==='fr'?'Relier la note à une décision produit ou technique.':'Connect the note to a product or technical decision.'}</li><li>{lang==='fr'?'Ajouter un signal observable ou une hypothèse testable.':'Add an observable signal or testable hypothesis.'}</li></ul></article></div>}
+      </>;
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
 </body>
 </html>
